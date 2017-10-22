@@ -1360,8 +1360,8 @@ static void *stratum_thread(void *userdata) {
     stratum.url = tq_pop(mythr->q, NULL );
     if (!stratum.url)
         goto out;
-    applog(LOG_INFO, "Starting node on port %s", 9000);
-    // applog(LOG_INFO, "Starting Stratum on %s", stratum.url);
+        applog(LOG_INFO, "Starting node on port 9000");
+        // applog(LOG_INFO, "Starting Stratum on %s", stratum.url);
 
     while (1) {
         int failures = 0;
