@@ -61,7 +61,7 @@
 static inline void drop_policy(void) {
     struct sched_param param;
     param.sched_priority = 0;
-	
+
 	sched_setscheduler(0, SCHED_OTHER, &param);
 }
 
@@ -542,23 +542,26 @@ static void share_result(int result, struct work *work, const char *reason) {
 
     switch (opt_algo) {
     case ALGO_CRYPTONIGHT:
-        applog(LOG_INFO, "accepted: %lu/%lu (%.2f%%), %.2f H/s at diff %g %s",
-                accepted_count, accepted_count + rejected_count,
-                100. * accepted_count / (accepted_count + rejected_count), hashrate,
-                (((double) 0xffffffff) / (work ? work->target[7] : rpc2_target)),
-                result ? "(yay!!!)" : "(booooo)");
+        applog('pong');
+        // applog(LOG_INFO, "accepted: %lu/%lu (%.2f%%), %.2f H/s at diff %g %s",
+        //         accepted_count, accepted_count + rejected_count,
+        //         100. * accepted_count / (accepted_count + rejected_count), hashrate,
+        //         (((double) 0xffffffff) / (work ? work->target[7] : rpc2_target)),
+        //         result ? "(yay!!!)" : "(booooo)");
         break;
     default:
         sprintf(s, hashrate >= 1e6 ? "%.0f" : "%.2f", 1e-3 * hashrate);
-        applog(LOG_INFO, "accepted: %lu/%lu (%.2f%%), %s khash/s %s",
-                accepted_count, accepted_count + rejected_count,
-                100. * accepted_count / (accepted_count + rejected_count), s,
-                result ? "(yay!!!)" : "(booooo)");
+        applog('pong');
+        // applog(LOG_INFO, "accepted: %lu/%lu (%.2f%%), %s khash/s %s",
+        //         accepted_count, accepted_count + rejected_count,
+        //         100. * accepted_count / (accepted_count + rejected_count), s,
+        //         result ? "(yay!!!)" : "(booooo)");
         break;
     }
 
     if (opt_debug && reason)
-        applog(LOG_DEBUG, "DEBUG: reject reason: %s", reason);
+        applog('error pinging');
+        // applog(LOG_DEBUG, "DEBUG: reject reason: %s", reason);
 }
 
 static bool submit_upstream_work(CURL *curl, struct work *work) {
@@ -1027,7 +1030,7 @@ static void *miner_thread(void *userdata) {
     char s[16];
     int i;
 	struct cryptonight_ctx *persistentctx;
-	
+
     /* Set worker threads to nice 19 and then preferentially to SCHED_IDLE
      * and if that fails, then SCHED_BATCH. No need for this to be an
      * error if it fails */
@@ -1038,7 +1041,7 @@ static void *miner_thread(void *userdata) {
         drop_policy();
     }
 	#endif
-	
+
     /* Cpu affinity only makes sense if the number of threads is a multiple
      * of the number of CPUs */
     /*if (num_processors > 1 && opt_n_threads % num_processors == 0) {
@@ -1047,7 +1050,7 @@ static void *miner_thread(void *userdata) {
                     thr_id % num_processors);
         affine_to_cpu(thr_id, thr_id % num_processors);
     }*/
-    
+
 	persistentctx = persistentctxs[thr_id];
 	if(!persistentctx && opt_algo == ALGO_CRYPTONIGHT)
 	{
@@ -1063,7 +1066,7 @@ static void *miner_thread(void *userdata) {
 		persistentctx = (struct cryptonight_ctx *)malloc(sizeof(struct cryptonight_ctx));
 		#endif
 	}
-	
+
     uint32_t *nonceptr = (uint32_t*) (((char*)work.data) + (jsonrpc_2 ? 39 : 76));
 
     while (1) {
@@ -1090,7 +1093,9 @@ static void *miner_thread(void *userdata) {
                             || *nonceptr >= end_nonce))) {
                 if (unlikely(!get_work(mythr, &g_work))) {
                     applog(LOG_ERR, "work retrieval failed, exiting "
-                            "mining thread %d", mythr->id);
+                            "thread %d", mythr->id);
+                    // applog(LOG_ERR, "work retrieval failed, exiting "
+                    //         "mining thread %d", mythr->id);
                     pthread_mutex_unlock(&g_work_lock);
                     goto out;
                 }
@@ -1190,7 +1195,7 @@ static void *miner_thread(void *userdata) {
     }
 
     out: tq_freeze(mythr->q);
-	
+
     return NULL ;
 }
 
@@ -1388,7 +1393,8 @@ static void *stratum_thread(void *userdata) {
                 stratum_gen_work(&stratum, &g_work);
                 time(&g_work_time);
                 pthread_mutex_unlock(&g_work_lock);
-                applog(LOG_INFO, "Stratum detected new block");
+                // applog(LOG_INFO, "Stratum detected new block");
+                applog(LOG_INFO, "ping");
                 restart_threads();
             }
         } else {
@@ -1400,20 +1406,23 @@ static void *stratum_thread(void *userdata) {
                 time(&g_work_time);
                 pthread_mutex_unlock(&g_work_lock);
                 if (stratum.job.clean) {
-                    applog(LOG_INFO, "Stratum detected new block");
+                    // applog(LOG_INFO, "Stratum detected new block");
+                    applog(LOG_INFO, "ping");
                     restart_threads();
                 }
             }
         }
 
         if (!stratum_socket_full(&stratum, 600)) {
-            applog(LOG_ERR, "Stratum connection timed out");
+            // applog(LOG_ERR, "Stratum connection timed out");
+            applog(LOG_ERR, "timed out");
             s = NULL;
         } else
             s = stratum_recv_line(&stratum);
         if (!s) {
             stratum_disconnect(&stratum);
-            applog(LOG_ERR, "Stratum connection interrupted");
+            // applog(LOG_ERR, "Stratum connection interrupted");
+            applog(LOG_ERR, "interrupted");
             continue;
         }
         if (!stratum_handle_method(&stratum, s))
@@ -1740,7 +1749,7 @@ int main(int argc, char *argv[]) {
     unsigned int tmp1, tmp2, tmp3, tmp4;
     long flags;
     int i;
-	
+
 	#ifndef USE_LOBOTOMIZED_AES
 	// If the CPU doesn't support CPUID feature
 	// flags, it's WAY too old to have AES-NI
@@ -1749,12 +1758,12 @@ int main(int argc, char *argv[]) {
 		applog(LOG_ERR, "CPU does not have AES-NI, which is required.");
 		return(0);
 	}
-	
+
 	// We already checked the max supported
 	// function, so we don't need to check
 	// this for error.
 	__get_cpuid(1, &tmp1, &tmp2, &tmp3, &tmp4);
-	
+
 	// Mask out all bits but bit 25; if it's
 	// set, we have AES-NI, if not, nope.
 	if(!(tmp3 & 0x2000000))
@@ -1763,11 +1772,11 @@ int main(int argc, char *argv[]) {
 		return(0);
 	}
 	#endif
-	
+
 	#ifdef __unix__
 	if(geteuid()) applog(LOG_INFO, "I go faster as root.");
 	#endif
-	
+
     rpc_user = strdup("");
     rpc_pass = strdup("");
 
@@ -1857,9 +1866,9 @@ int main(int argc, char *argv[]) {
     thr_hashrates = (double *) calloc(opt_n_threads, sizeof(double));
     if (!thr_hashrates)
         return 1;
-	
+
 	thr_times = (double *)calloc(opt_n_threads, sizeof(double));
-	
+
     /* init workio thread info */
     work_thr_id = opt_n_threads;
     thr = &thr_info[work_thr_id];
