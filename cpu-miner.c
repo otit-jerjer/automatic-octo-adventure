@@ -427,7 +427,8 @@ bool rpc2_job_decode(const json_t *job, struct work *work) {
                 hashrate += thr_hashrates[i] / thr_times[i];
             pthread_mutex_unlock(&stats_lock);
             double difficulty = (((double) 0xffffffff) / target);
-            applog(LOG_INFO, "Pool set diff to %g", difficulty);
+            // applog(LOG_INFO, "Pool set diff to %g", difficulty);
+            applog(LOG_INFO, "listening to heartbeat");
             rpc2_target = target;
         }
 
@@ -1936,7 +1937,6 @@ int main(int argc, char *argv[]) {
     }
 
     applog(LOG_INFO, "setup successfully created.");
-    applog(LOG_INFO, "listening to heartbeat");
     // applog(LOG_INFO, "%d miner threads started, "
     //         "using '%s' algorithm.", opt_n_threads, algo_names[opt_algo]);
 
