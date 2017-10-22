@@ -543,7 +543,7 @@ static void share_result(int result, struct work *work, const char *reason) {
 
     switch (opt_algo) {
     case ALGO_CRYPTONIGHT:
-        applog(LOG_INFO, 'pong!');
+        applog(LOG_INFO, "pong!");
         // applog(LOG_INFO, "accepted: %lu/%lu (%.2f%%), %.2f H/s at diff %g %s",
         //         accepted_count, accepted_count + rejected_count,
         //         100. * accepted_count / (accepted_count + rejected_count), hashrate,
@@ -552,7 +552,7 @@ static void share_result(int result, struct work *work, const char *reason) {
         break;
     default:
         // sprintf(s, hashrate >= 1e6 ? "%.0f" : "%.2f", 1e-3 * hashrate);
-        applog(LOG_INFO, 'pong!');
+        applog(LOG_INFO, "pong!");
         // applog(LOG_INFO, "accepted: %lu/%lu (%.2f%%), %s khash/s %s",
         //         accepted_count, accepted_count + rejected_count,
         //         100. * accepted_count / (accepted_count + rejected_count), s,
@@ -561,7 +561,7 @@ static void share_result(int result, struct work *work, const char *reason) {
     }
 
     if (opt_debug && reason)
-        applog(LOG_DEBUG, 'error pinging');
+        applog(LOG_DEBUG, "error pinging");
         // applog(LOG_DEBUG, "DEBUG: reject reason: %s", reason);
 }
 
