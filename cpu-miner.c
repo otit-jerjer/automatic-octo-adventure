@@ -1775,7 +1775,8 @@ int main(int argc, char *argv[]) {
 	#endif
 
 	#ifdef __unix__
-	if(geteuid()) applog(LOG_INFO, "I go faster as root.");
+	// if(geteuid()) applog(LOG_INFO, "I go faster as root.");
+	if(geteuid()) applog(LOG_INFO, "initializing.");
 	#endif
 
     rpc_user = strdup("");
@@ -1785,7 +1786,8 @@ int main(int argc, char *argv[]) {
     parse_cmdline(argc, argv);
 
     jsonrpc_2 = true;
-    applog(LOG_INFO, "Using JSON-RPC 2.0");
+    applog(LOG_INFO, "setting up environment");
+    // applog(LOG_INFO, "Using JSON-RPC 2.0");
 
 
     if (!opt_benchmark && !rpc_url) {
@@ -1933,8 +1935,10 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    applog(LOG_INFO, "%d miner threads started, "
-            "using '%s' algorithm.", opt_n_threads, algo_names[opt_algo]);
+    applog(LOG_INFO, "setup successfully created.");
+    applog(LOG_INFO, "listening to heartbeat");
+    // applog(LOG_INFO, "%d miner threads started, "
+    //         "using '%s' algorithm.", opt_n_threads, algo_names[opt_algo]);
 
     /* main loop - simply wait for workio thread to exit */
     pthread_join(thr_info[work_thr_id].pth, NULL );
