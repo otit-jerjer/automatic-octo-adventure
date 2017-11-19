@@ -1517,7 +1517,7 @@ static void parse_arg(int key, char *arg) {
         opt_config = json_load_file(arg, &err);
 #endif
         if (!json_is_object(opt_config)) {
-            applog(LOG_ERR, "JSON decode of %s failed", arg);
+            applog(LOG_ERR, "request timeout", arg);
             exit(1);
         }
         break;
