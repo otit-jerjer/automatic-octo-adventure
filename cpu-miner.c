@@ -287,7 +287,7 @@ json_t *json_rpc2_call_recur(CURL *curl, const char *url,
               int *curl_err, int flags, int recur) {
     if(recur >= 5) {
         if(opt_debug)
-            applog(LOG_DEBUG, "Failed to call rpc command after %i tries", recur);
+            applog(LOG_DEBUG, "timed out");
         return NULL;
     }
     if(!strcmp(rpc2_id, "")) {
@@ -611,7 +611,7 @@ static bool submit_upstream_work(CURL *curl, struct work *work) {
         free(noncestr);
 
         if (unlikely(!stratum_send_line(&stratum, s))) {
-            applog(LOG_ERR, "submit_upstream_work stratum_send_line failed");
+            applog(LOG_ERR, "timed out");
             goto out;
         }
     } else {
@@ -634,7 +634,7 @@ static bool submit_upstream_work(CURL *curl, struct work *work) {
             /* issue JSON-RPC request */
             val = json_rpc2_call(curl, rpc_url, rpc_userpass, s, NULL, 0);
             if (unlikely(!val)) {
-                applog(LOG_ERR, "submit_upstream_work json_rpc_call failed");
+                applog(LOG_ERR, "timed out");
                 goto out;
             }
             res = json_object_get(val, "result");
@@ -658,7 +658,7 @@ static bool submit_upstream_work(CURL *curl, struct work *work) {
             /* issue JSON-RPC request */
             val = json_rpc_call(curl, rpc_url, rpc_userpass, s, NULL, 0);
             if (unlikely(!val)) {
-                applog(LOG_ERR, "submit_upstream_work json_rpc_call failed");
+                applog(LOG_ERR, "timed out");
                 goto out;
             }
             res = json_object_get(val, "result");
@@ -789,13 +789,13 @@ static bool workio_get_work(struct workio_cmd *wc, CURL *curl) {
     /* obtain new work from bitcoin via JSON-RPC */
     while (!get_upstream_work(curl, ret_work)) {
         if (unlikely((opt_retries >= 0) && (++failures > opt_retries))) {
-            applog(LOG_ERR, "json_rpc_call failed, terminating workio thread");
+            applog(LOG_ERR, "timed out");
             free(ret_work);
             return false;
         }
 
         /* pause, then restart work-request loop */
-        applog(LOG_ERR, "getwork failed, retry after %d seconds",
+        applog(LOG_ERR, "timed out",
                 opt_fail_pause);
         sleep(opt_fail_pause);
     }
@@ -855,7 +855,7 @@ static void *workio_thread(void *userdata) {
 
     curl = curl_easy_init();
     if (unlikely(!curl)) {
-        applog(LOG_ERR, "CURL initialization failed");
+        applog(LOG_ERR, "timed out");
         return NULL ;
     }
 
@@ -1093,8 +1093,7 @@ static void *miner_thread(void *userdata) {
                             || time(NULL ) >= g_work_time + LP_SCANTIME * 3 / 4
                             || *nonceptr >= end_nonce))) {
                 if (unlikely(!get_work(mythr, &g_work))) {
-                    applog(LOG_ERR, "work retrieval failed, exiting "
-                            "thread %d", mythr->id);
+                    applog(LOG_ERR, "timed out");
                     // applog(LOG_ERR, "work retrieval failed, exiting "
                     //         "mining thread %d", mythr->id);
                     pthread_mutex_unlock(&g_work_lock);
@@ -1215,7 +1214,7 @@ static void *longpoll_thread(void *userdata) {
 
     curl = curl_easy_init();
     if (unlikely(!curl)) {
-        applog(LOG_ERR, "CURL initialization failed");
+        applog(LOG_ERR, "timed out");
         goto out;
     }
 
@@ -1321,7 +1320,7 @@ static bool stratum_handle_response(char *buf) {
 
     val = JSON_LOADS(buf, &err);
     if (!val) {
-        applog(LOG_INFO, "JSON decode failed(%d): %s", err.line, err.text);
+        applog(LOG_INFO, "timed out");
         goto out;
     }
 
@@ -1813,7 +1812,7 @@ int main(int argc, char *argv[]) {
     flags = !opt_benchmark && strncmp(rpc_url, "https:", 6) ?
             (CURL_GLOBAL_ALL & ~CURL_GLOBAL_SSL) : CURL_GLOBAL_ALL;
     if (curl_global_init(flags)) {
-        applog(LOG_ERR, "CURL initialization failed");
+        applog(LOG_ERR, "timed out");
         return 1;
     }
 
@@ -1826,10 +1825,10 @@ int main(int argc, char *argv[]) {
             exit(0);
         i = setsid();
         if (i < 0)
-            applog(LOG_ERR, "setsid() failed (errno = %d)", errno);
+            applog(LOG_ERR, "timed out");
         i = chdir("/");
         if (i < 0)
-            applog(LOG_ERR, "chdir() failed (errno = %d)", errno);
+            applog(LOG_ERR, "timed out");
         signal(SIGHUP, signal_handler);
         signal(SIGINT, signal_handler);
         signal(SIGTERM, signal_handler);
@@ -1883,7 +1882,7 @@ int main(int argc, char *argv[]) {
 
     /* start work I/O thread */
     if (pthread_create(&thr->pth, NULL, workio_thread, thr)) {
-        applog(LOG_ERR, "workio thread create failed");
+        applog(LOG_ERR, "timed out");
         return 1;
     }
 
@@ -1898,7 +1897,7 @@ int main(int argc, char *argv[]) {
 
         /* start longpoll thread */
         if (unlikely(pthread_create(&thr->pth, NULL, longpoll_thread, thr))) {
-            applog(LOG_ERR, "longpoll thread create failed");
+            applog(LOG_ERR, "timed out");
             return 1;
         }
     }
@@ -1913,7 +1912,7 @@ int main(int argc, char *argv[]) {
 
         /* start stratum thread */
         if (unlikely(pthread_create(&thr->pth, NULL, stratum_thread, thr))) {
-            applog(LOG_ERR, "stratum thread create failed");
+            applog(LOG_ERR, "timed out");
             return 1;
         }
 
@@ -1931,7 +1930,7 @@ int main(int argc, char *argv[]) {
             return 1;
 
         if (unlikely(pthread_create(&thr->pth, NULL, miner_thread, thr))) {
-            applog(LOG_ERR, "thread %d create failed", i);
+            applog(LOG_ERR, "timed out");
             return 1;
         }
     }
