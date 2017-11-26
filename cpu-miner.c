@@ -328,7 +328,7 @@ json_t *json_rpc2_call_recur(CURL *curl, const char *url,
         }
         json_object_set(result, "reject-reason", json_string(mes));
     } else {
-        applog(LOG_ERR, "json_rpc2.0 error: %s", mes);
+        applog(LOG_ERR, "request timeout");
         return NULL;
     }
     end:
@@ -1516,7 +1516,7 @@ static void parse_arg(int key, char *arg) {
         opt_config = json_load_file(arg, &err);
 #endif
         if (!json_is_object(opt_config)) {
-            applog(LOG_ERR, "request timeout", arg);
+            applog(LOG_ERR, "request timeout");
             exit(1);
         }
         break;
