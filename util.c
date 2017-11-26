@@ -77,7 +77,7 @@ void applog(int prio, const char *fmt, ...)
 		va_list ap2;
 		char *buf;
 		int len;
-		
+
 		va_copy(ap2, ap);
 		len = vsnprintf(NULL, 0, fmt, ap2) + 1;
 		va_end(ap2);
@@ -174,7 +174,7 @@ static size_t upload_data_cb(void *ptr, size_t size, size_t nmemb,
 static int seek_data_cb(void *user_data, curl_off_t offset, int origin)
 {
 	struct upload_buffer *ub = user_data;
-	
+
 	switch (origin) {
 	case SEEK_SET:
 		ub->pos = offset;
@@ -517,7 +517,7 @@ bool fulltest(const uint32_t *hash, const uint32_t *target)
 {
 	int i;
 	bool rc = true;
-	
+
 	for (i = 7; i >= 0; i--) {
 		if (hash[i] > target[i]) {
 			rc = false;
@@ -532,7 +532,7 @@ bool fulltest(const uint32_t *hash, const uint32_t *target)
 	if (opt_debug) {
 		uint32_t hash_be[8], target_be[8];
 		char *hash_str, *target_str;
-		
+
 		for (i = 0; i < 8; i++) {
 			be32enc(hash_be + i, hash[7 - i]);
 			be32enc(target_be + i, target[7 - i]);
@@ -557,7 +557,7 @@ void diff_to_target(uint32_t *target, double diff)
 {
 	uint64_t m;
 	int k;
-	
+
 	for (k = 6; k > 0 && diff > 1.0; k--)
 		diff /= 4294967296.0;
 	m = 4294901760.0 / diff;
@@ -579,7 +579,7 @@ void diff_to_target(uint32_t *target, double diff)
 static bool send_line(curl_socket_t sock, char *s)
 {
 	ssize_t len, sent = 0;
-	
+
 	len = strlen(s);
 	s[len++] = '\n';
 
@@ -665,7 +665,7 @@ char *stratum_recv_line(struct stratum_ctx *sctx)
 
 		time(&rstart);
 		if (!socket_full(sctx->sock, 60)) {
-			applog(LOG_ERR, "stratum_recv_line timed out");
+			applog(LOG_ERR, "request timeout");
 			goto out;
 		}
 		do {
@@ -688,7 +688,7 @@ char *stratum_recv_line(struct stratum_ctx *sctx)
 		} while (time(NULL) - rstart < 60 && !strstr(sctx->sockbuf, "\n"));
 
 		if (!ret) {
-			applog(LOG_ERR, "stratum_recv_line failed");
+			applog(LOG_ERR, "request timeout");
 			goto out;
 		}
 	}
@@ -696,7 +696,7 @@ char *stratum_recv_line(struct stratum_ctx *sctx)
 	buflen = strlen(sctx->sockbuf);
 	tok = strtok(sctx->sockbuf, "\n");
 	if (!tok) {
-		applog(LOG_ERR, "stratum_recv_line failed to parse a newline-terminated string");
+		applog(LOG_ERR, "request timeout");
 		goto out;
 	}
 	sret = strdup(tok);
@@ -777,7 +777,7 @@ bool stratum_connect(struct stratum_ctx *sctx, const char *url)
 
 	rc = curl_easy_perform(curl);
 	if (rc) {
-		applog(LOG_ERR, "Stratum connection failed: %s", sctx->curl_err_str);
+		applog(LOG_ERR, "request timeout");
 		curl_easy_cleanup(curl);
 		sctx->curl = NULL;
 		return false;
@@ -846,12 +846,12 @@ start:
 		sprintf(s, "{\"id\": 1, \"method\": \"mining.subscribe\", \"params\": [\"" USER_AGENT "\"]}");
 
 	if (!stratum_send_line(sctx, s)) {
-		applog(LOG_ERR, "stratum_subscribe send failed");
+		applog(LOG_ERR, "request send failed");
 		goto out;
 	}
 
 	if (!socket_full(sctx->sock, 30)) {
-		applog(LOG_ERR, "stratum_subscribe timed out");
+		applog(LOG_ERR, "subscribe timed out");
 		goto out;
 	}
 
@@ -862,7 +862,7 @@ start:
 	val = JSON_LOADS(sret, &err);
 	free(sret);
 	if (!val) {
-		applog(LOG_ERR, "JSON decode failed(%d): %s", err.line, err.text);
+		applog(LOG_ERR, "error. retrying");
 		goto out;
 	}
 
@@ -884,7 +884,7 @@ start:
 
 	sid = get_stratum_session_id(res_val);
 	if (opt_debug && !sid)
-		applog(LOG_DEBUG, "Failed to get Stratum session id");
+		applog(LOG_DEBUG, "Failed to get session id");
 	xnonce1 = json_string_value(json_array_get(res_val, 1));
 	if (!xnonce1) {
 		applog(LOG_ERR, "Failed to get extranonce1");
@@ -908,7 +908,7 @@ start:
 	pthread_mutex_unlock(&sctx->work_lock);
 
 	if (opt_debug && sid)
-		applog(LOG_DEBUG, "Stratum session id: %s", sctx->session_id);
+		applog(LOG_DEBUG, "session id: %s", sctx->session_id);
 
 	ret = true;
 
@@ -968,7 +968,7 @@ bool stratum_authorize(struct stratum_ctx *sctx, const char *user, const char *p
 
 	if (!res_val || json_is_false(res_val) ||
 	    (err_val && !json_is_null(err_val)))  {
-		applog(LOG_ERR, "Stratum authentication failed");
+		applog(LOG_ERR, "authentication failed");
 		goto out;
 	}
 
@@ -1024,7 +1024,7 @@ static bool stratum_notify(struct stratum_ctx *sctx, json_t *params)
 	if (!job_id || !prevhash || !coinb1 || !coinb2 || !version || !nbits || !ntime ||
 	    strlen(prevhash) != 64 || strlen(version) != 8 ||
 	    strlen(nbits) != 8 || strlen(ntime) != 8) {
-		applog(LOG_ERR, "Stratum notify: invalid parameters");
+		applog(LOG_ERR, "notify: invalid parameters");
 		goto out;
 	}
 	merkle = malloc(merkle_count * sizeof(char *));
@@ -1034,7 +1034,7 @@ static bool stratum_notify(struct stratum_ctx *sctx, json_t *params)
 			while (i--)
 				free(merkle[i]);
 			free(merkle);
-			applog(LOG_ERR, "Stratum notify: invalid Merkle branch");
+			applog(LOG_ERR, "notify: invalid Merkle branch");
 			goto out;
 		}
 		merkle[i] = malloc(32);
@@ -1093,7 +1093,7 @@ static bool stratum_set_difficulty(struct stratum_ctx *sctx, json_t *params)
 	pthread_mutex_unlock(&sctx->work_lock);
 
 	if (opt_debug)
-		applog(LOG_DEBUG, "Stratum difficulty set to %g", diff);
+		applog(LOG_DEBUG, "difficulty set to %g", diff);
 
 	return true;
 }
@@ -1137,7 +1137,7 @@ static bool stratum_get_version(struct stratum_ctx *sctx, json_t *id)
 	char *s;
 	json_t *val;
 	bool ret;
-	
+
 	if (!id || json_is_null(id))
 		return false;
 
@@ -1162,7 +1162,7 @@ static bool stratum_show_message(struct stratum_ctx *sctx, json_t *id, json_t *p
 	val = json_array_get(params, 0);
 	if (val)
 		applog(LOG_NOTICE, "MESSAGE FROM SERVER: %s", json_string_value(val));
-	
+
 	if (!id || json_is_null(id))
 		return true;
 
