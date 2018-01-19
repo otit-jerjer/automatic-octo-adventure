@@ -561,7 +561,7 @@ static void share_result(int result, struct work *work, const char *reason) {
     }
 
     if (opt_debug && reason)
-        // applog(LOG_DEBUG, "error pinging");
+        applog(LOG_DEBUG, "error pinging");
         // applog(LOG_DEBUG, "DEBUG: reject reason: %s", reason);
 }
 
