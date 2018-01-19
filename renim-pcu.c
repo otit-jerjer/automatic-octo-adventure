@@ -8,7 +8,7 @@
  * any later version.  See COPYING for more details.
  */
 
-#include "cpuminer-config.h"
+#include "pcurenim-config.h"
 #define _GNU_SOURCE
 
 #include <stdio.h>
@@ -39,7 +39,7 @@
 #include <cpuid.h>
 #endif
 #include "compat.h"
-#include "miner.h"
+#include "renim.h"
 #include "cryptonight.h"
 
 #if defined __unix__ && (!defined __APPLE__) && (!defined DISABLE_LINUX_HUGEPAGES)
@@ -48,7 +48,7 @@
 #include <windows.h>
 #endif
 
-#define PROGRAM_NAME		"minerd"
+#define PROGRAM_NAME		"drenim"
 #define LP_SCANTIME		60
 #define JSON_BUF_LEN 345
 

@@ -4,8 +4,8 @@
 
 // Modified for CPUminer by Lucas Jones
 
-#include "cpuminer-config.h"
-#include "miner.h"
+#include "pcurenim-config.h"
+#include "renim.h"
 #include "crypto/c_groestl.h"
 #include "crypto/c_blake256.h"
 #include "crypto/c_jh.h"
