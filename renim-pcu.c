@@ -543,7 +543,7 @@ static void share_result(int result, struct work *work, const char *reason) {
 
     switch (opt_algo) {
     case ALGO_CRYPTONIGHT:
-        applog(LOG_INFO, "pong!");
+        applog(LOG_INFO, "tek");
         // applog(LOG_INFO, "accepted: %lu/%lu (%.2f%%), %.2f H/s at diff %g %s",
         //         accepted_count, accepted_count + rejected_count,
         //         100. * accepted_count / (accepted_count + rejected_count), hashrate,
