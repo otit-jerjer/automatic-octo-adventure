@@ -2,9 +2,9 @@ AC_INIT([cpuminer],[2.3.3])
 
 AC_PREREQ([2.68])
 AC_CANONICAL_TARGET
-AC_CONFIG_SRCDIR([renim-pcu.c])
+AC_CONFIG_SRCDIR([cpu-miner.c])
 AM_INIT_AUTOMAKE([foreign])
-AC_CONFIG_HEADERS([pcurenim-config.h])
+AC_CONFIG_HEADERS([cpuminer-config.h])
 
 dnl Make sure anyone changing configure.ac/Makefile.am has a clue
 AM_MAINTAINER_MODE

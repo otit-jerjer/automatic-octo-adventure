@@ -9,7 +9,7 @@
  */
 
 #define _GNU_SOURCE
-#include "pcurenim-config.h"
+#include "cpuminer-config.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -32,7 +32,7 @@
 #include <netinet/tcp.h>
 #endif
 #include "compat.h"
-#include "renim.h"
+#include "miner.h"
 #include "elist.h"
 
 struct data_buffer {

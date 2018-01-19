@@ -3,7 +3,7 @@
 
 #include <stddef.h>
 #include "crypto/oaes_lib.h"
-#include "renim.h"
+#include "miner.h"
 
 #define MEMORY         (1 << 21) /* 2 MiB */
 #define ITER           (1 << 20)
