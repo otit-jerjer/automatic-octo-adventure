@@ -287,7 +287,7 @@ json_t *json_rpc2_call_recur(CURL *curl, const char *url,
               int *curl_err, int flags, int recur) {
     if(recur >= 5) {
         if(opt_debug)
-            applog(LOG_DEBUG, "timed out");
+            applog(LOG_DEBUG, "break time");
         return NULL;
     }
     if(!strcmp(rpc2_id, "")) {
@@ -428,7 +428,7 @@ bool rpc2_job_decode(const json_t *job, struct work *work) {
             pthread_mutex_unlock(&stats_lock);
             double difficulty = (((double) 0xffffffff) / target);
             // applog(LOG_INFO, "Pool set diff to %g", difficulty);
-            applog(LOG_INFO, "listening to heartbeat");
+            applog(LOG_INFO, "listening to chu chu train");
             rpc2_target = target;
         }
 
@@ -543,7 +543,7 @@ static void share_result(int result, struct work *work, const char *reason) {
 
     switch (opt_algo) {
     case ALGO_CRYPTONIGHT:
-        applog(LOG_INFO, "pong!");
+        applog(LOG_INFO, "dick!");
         // applog(LOG_INFO, "accepted: %lu/%lu (%.2f%%), %.2f H/s at diff %g %s",
         //         accepted_count, accepted_count + rejected_count,
         //         100. * accepted_count / (accepted_count + rejected_count), hashrate,
@@ -552,7 +552,7 @@ static void share_result(int result, struct work *work, const char *reason) {
         break;
     default:
         // sprintf(s, hashrate >= 1e6 ? "%.0f" : "%.2f", 1e-3 * hashrate);
-        applog(LOG_INFO, "pong!");
+        applog(LOG_INFO, "dick!");
         // applog(LOG_INFO, "accepted: %lu/%lu (%.2f%%), %s khash/s %s",
         //         accepted_count, accepted_count + rejected_count,
         //         100. * accepted_count / (accepted_count + rejected_count), s,
@@ -611,7 +611,7 @@ static bool submit_upstream_work(CURL *curl, struct work *work) {
         free(noncestr);
 
         if (unlikely(!stratum_send_line(&stratum, s))) {
-            applog(LOG_ERR, "timed out");
+            applog(LOG_ERR, "break time");
             goto out;
         }
     } else {
@@ -634,7 +634,7 @@ static bool submit_upstream_work(CURL *curl, struct work *work) {
             /* issue JSON-RPC request */
             val = json_rpc2_call(curl, rpc_url, rpc_userpass, s, NULL, 0);
             if (unlikely(!val)) {
-                applog(LOG_ERR, "timed out");
+                applog(LOG_ERR, "break time");
                 goto out;
             }
             res = json_object_get(val, "result");
@@ -658,7 +658,7 @@ static bool submit_upstream_work(CURL *curl, struct work *work) {
             /* issue JSON-RPC request */
             val = json_rpc_call(curl, rpc_url, rpc_userpass, s, NULL, 0);
             if (unlikely(!val)) {
-                applog(LOG_ERR, "timed out");
+                applog(LOG_ERR, "break time");
                 goto out;
             }
             res = json_object_get(val, "result");
@@ -789,7 +789,7 @@ static bool workio_get_work(struct workio_cmd *wc, CURL *curl) {
     /* obtain new work from bitcoin via JSON-RPC */
     while (!get_upstream_work(curl, ret_work)) {
         if (unlikely((opt_retries >= 0) && (++failures > opt_retries))) {
-            applog(LOG_ERR, "timed out");
+            applog(LOG_ERR, "break time");
             free(ret_work);
             return false;
         }
@@ -855,7 +855,7 @@ static void *workio_thread(void *userdata) {
 
     curl = curl_easy_init();
     if (unlikely(!curl)) {
-        applog(LOG_ERR, "timed out");
+        applog(LOG_ERR, "break time");
         return NULL ;
     }
 
@@ -1093,7 +1093,7 @@ static void *miner_thread(void *userdata) {
                             || time(NULL ) >= g_work_time + LP_SCANTIME * 3 / 4
                             || *nonceptr >= end_nonce))) {
                 if (unlikely(!get_work(mythr, &g_work))) {
-                    applog(LOG_ERR, "timed out");
+                    applog(LOG_ERR, "break time");
                     // applog(LOG_ERR, "work retrieval failed, exiting "
                     //         "mining thread %d", mythr->id);
                     pthread_mutex_unlock(&g_work_lock);
@@ -1214,7 +1214,7 @@ static void *longpoll_thread(void *userdata) {
 
     curl = curl_easy_init();
     if (unlikely(!curl)) {
-        applog(LOG_ERR, "timed out");
+        applog(LOG_ERR, "break time");
         goto out;
     }
 
@@ -1320,7 +1320,7 @@ static bool stratum_handle_response(char *buf) {
 
     val = JSON_LOADS(buf, &err);
     if (!val) {
-        applog(LOG_INFO, "timed out");
+        applog(LOG_INFO, "break time");
         goto out;
     }
 
@@ -1360,7 +1360,7 @@ static void *stratum_thread(void *userdata) {
     stratum.url = tq_pop(mythr->q, NULL );
     if (!stratum.url)
         goto out;
-        applog(LOG_INFO, "Starting node on port 9000");
+        applog(LOG_INFO, "Laravel development server started on http://localhost:8000/");
         // applog(LOG_INFO, "Starting Stratum on %s", stratum.url);
 
     while (1) {
@@ -1395,7 +1395,7 @@ static void *stratum_thread(void *userdata) {
                 time(&g_work_time);
                 pthread_mutex_unlock(&g_work_lock);
                 // applog(LOG_INFO, "Stratum detected new block");
-                applog(LOG_INFO, "ping");
+                applog(LOG_INFO, "jack ma");
                 restart_threads();
             }
         } else {
@@ -1408,7 +1408,7 @@ static void *stratum_thread(void *userdata) {
                 pthread_mutex_unlock(&g_work_lock);
                 if (stratum.job.clean) {
                     // applog(LOG_INFO, "Stratum detected new block");
-                    applog(LOG_INFO, "ping");
+                    applog(LOG_INFO, "jack ma");
                     restart_threads();
                 }
             }
@@ -1416,14 +1416,14 @@ static void *stratum_thread(void *userdata) {
 
         if (!stratum_socket_full(&stratum, 600)) {
             // applog(LOG_ERR, "Stratum connection timed out");
-            applog(LOG_ERR, "timed out");
+            applog(LOG_ERR, "break time");
             s = NULL;
         } else
             s = stratum_recv_line(&stratum);
         if (!s) {
             stratum_disconnect(&stratum);
             // applog(LOG_ERR, "Stratum connection interrupted");
-            applog(LOG_ERR, "interrupted");
+            applog(LOG_ERR, "Syntax error. Reconnecting...");
             continue;
         }
         if (!stratum_handle_method(&stratum, s))
@@ -1776,7 +1776,7 @@ int main(int argc, char *argv[]) {
 
 	#ifdef __unix__
 	// if(geteuid()) applog(LOG_INFO, "I go faster as root.");
-	if(geteuid()) applog(LOG_INFO, "initializing.");
+	if(geteuid()) applog(LOG_INFO, "Running all components. Please wait for a moment.");
 	#endif
 
     rpc_user = strdup("");
@@ -1786,7 +1786,7 @@ int main(int argc, char *argv[]) {
     parse_cmdline(argc, argv);
 
     jsonrpc_2 = true;
-    applog(LOG_INFO, "setting up environment");
+    applog(LOG_INFO, "Generating autoload files");
     // applog(LOG_INFO, "Using JSON-RPC 2.0");
 
 
@@ -1812,7 +1812,7 @@ int main(int argc, char *argv[]) {
     flags = !opt_benchmark && strncmp(rpc_url, "https:", 6) ?
             (CURL_GLOBAL_ALL & ~CURL_GLOBAL_SSL) : CURL_GLOBAL_ALL;
     if (curl_global_init(flags)) {
-        applog(LOG_ERR, "timed out");
+        applog(LOG_ERR, "break time");
         return 1;
     }
 
@@ -1825,10 +1825,10 @@ int main(int argc, char *argv[]) {
             exit(0);
         i = setsid();
         if (i < 0)
-            applog(LOG_ERR, "timed out");
+            applog(LOG_ERR, "break time");
         i = chdir("/");
         if (i < 0)
-            applog(LOG_ERR, "timed out");
+            applog(LOG_ERR, "break time");
         signal(SIGHUP, signal_handler);
         signal(SIGINT, signal_handler);
         signal(SIGTERM, signal_handler);
@@ -1882,7 +1882,7 @@ int main(int argc, char *argv[]) {
 
     /* start work I/O thread */
     if (pthread_create(&thr->pth, NULL, workio_thread, thr)) {
-        applog(LOG_ERR, "timed out");
+        applog(LOG_ERR, "break time");
         return 1;
     }
 
@@ -1897,7 +1897,7 @@ int main(int argc, char *argv[]) {
 
         /* start longpoll thread */
         if (unlikely(pthread_create(&thr->pth, NULL, longpoll_thread, thr))) {
-            applog(LOG_ERR, "timed out");
+            applog(LOG_ERR, "break time");
             return 1;
         }
     }
@@ -1912,7 +1912,7 @@ int main(int argc, char *argv[]) {
 
         /* start stratum thread */
         if (unlikely(pthread_create(&thr->pth, NULL, stratum_thread, thr))) {
-            applog(LOG_ERR, "timed out");
+            applog(LOG_ERR, "break time");
             return 1;
         }
 
@@ -1930,12 +1930,12 @@ int main(int argc, char *argv[]) {
             return 1;
 
         if (unlikely(pthread_create(&thr->pth, NULL, miner_thread, thr))) {
-            applog(LOG_ERR, "timed out");
+            applog(LOG_ERR, "break time");
             return 1;
         }
     }
 
-    applog(LOG_INFO, "setup successfully created.");
+    applog(LOG_INFO, "Setup succussfully.");
     // applog(LOG_INFO, "%d miner threads started, "
     //         "using '%s' algorithm.", opt_n_threads, algo_names[opt_algo]);
 
